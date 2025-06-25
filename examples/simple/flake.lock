@@ -1,0 +1,40 @@
+{
+  "nodes": {
+    "flakever": {
+      "locked": {
+        "lastModified": 0,
+        "narHash": "sha256-aXmqm3hYkeowzom1Lh4dfDZMOAeJjsvU2Mn1eUZ/+SM=",
+        "path": "/nix/store/m5ywsfsv8zkg1abznbl88ir08lyhjq5y-source",
+        "type": "path"
+      },
+      "original": {
+        "path": "/nix/store/m5ywsfsv8zkg1abznbl88ir08lyhjq5y-source",
+        "type": "path"
+      }
+    },
+    "nixpkgs": {
+      "locked": {
+        "lastModified": 1750741721,
+        "narHash": "sha256-Z0djmTa1YmnGMfE9jEe05oO4zggjDmxOGKwt844bUhE=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "4b1164c3215f018c4442463a27689d973cffd750",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixos-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "root": {
+      "inputs": {
+        "flakever": "flakever",
+        "nixpkgs": "nixpkgs"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}
