@@ -19,6 +19,7 @@
 
           /**
             A regex for matching flake inputs that contain a version output.
+            The first match is the input name; the second one is the branch.
           */
           inputVersionRegex ? "^(flakever-(.+))$",
 
@@ -214,7 +215,7 @@
               # Get the version and other constants.
               version=${lib.escapeShellArg (handleConstantPlaceholders versionInfo.versionTemplate)}
               version="''${VERSION:-$version}"
-              lastModified=${lib.escapeShellArg (toString selfVersionInfo.lastModified)}
+              lastModified=${lib.escapeShellArg (toString versionInfo.lastModified)}
               dateFormat=${lib.escapeShellArg dateFormat}
               secondsPerNightly=${lib.escapeShellArg (toString secondsPerNightly)}
               factors=(${lib.escapeShellArgs (map toString factors)})

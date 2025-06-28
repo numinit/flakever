@@ -30,7 +30,7 @@
         inherit pkgs;
 
         # Active branch.
-        branch = "dev";
+        branch = builtins.readFile ./BRANCH;
 
         # The default is `flakever` but you can change it.
         scriptName = "version";
