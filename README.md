@@ -48,11 +48,12 @@ build pipelines, like Android.
 
 For example, `digits = [ 1 2 2 3 ]` would allow versions that look like
 `0.0.0.0` up to `9.99.99.999`, and generate a version code that ranges from 0
-to 99999999. Parts can be arbitrarily suffixed and still parse so long as they;
+to 99999999. Parts can be arbitrarily suffixed and still parse so long as they
 start with a sequence of digits; for instance, a version template of
-`1.2.3.4-foo` would parse as `10203004`. As another example, a template of
-`1.2.<nightly>-foo` with `digits = [ 1 2 2 ]` without a change to
-`secondsPerNightly` would saturate at `1.2.99-foo` and `10299`. Flakever
-does this by replacing leading sequences of digits in the version using Nix
-prior to building the Bash utility that outputs the version.
+`1.2.3.4-foo` would parse as `10203004`.
 
+As another example, a template of `1.2.<nightly>-foo` with
+`digits = [ 1 2 2 ]` without a change to `secondsPerNightly` would saturate
+at `1.2.99-foo` and `10299`. Flakever does this by replacing leading sequences
+of digits in the version using Nix prior to building the Bash utility that
+outputs the version.
