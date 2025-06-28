@@ -3,12 +3,12 @@
     "flakever": {
       "locked": {
         "lastModified": 0,
-        "narHash": "sha256-Xtu9X49fIhBQixtnle5LCmFHMPz1YBRSpjfOCzJYYb4=",
-        "path": "/nix/store/fvf9xpxjd0flyiyyhxrpsyzsyhqiglp0-source",
+        "narHash": "sha256-pLWwLl45zlz+uvCeVwhg8vGAdzr67UbqUtF82ZNZaQY=",
+        "path": "/nix/store/2zvsf5vashnzbv5jwbf17qifnzbyyhya-source",
         "type": "path"
       },
       "original": {
-        "path": "/nix/store/fvf9xpxjd0flyiyyhxrpsyzsyhqiglp0-source",
+        "path": "/nix/store/2zvsf5vashnzbv5jwbf17qifnzbyyhya-source",
         "type": "path"
       }
     },

@@ -187,7 +187,6 @@
             let
               match = builtins.match "^([0-9]+)(.*)$" componentStr;
             in
-            assert match != null;
             match;
 
           # Replaces an integer at the start of the specified version component string.
@@ -196,7 +195,7 @@
             let
               match = getComponentMatch componentStr;
             in
-            toString x + (builtins.head (builtins.tail match));
+            if match == null then componentStr else toString x + (builtins.head (builtins.tail match));
 
           # Creates a version component, saturating it at digits.
           makeComponent =
