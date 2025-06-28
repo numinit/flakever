@@ -1,0 +1,91 @@
+{
+  "nodes": {
+    "flakever": {
+      "locked": {
+        "lastModified": 0,
+        "narHash": "sha256-RtZLAtPqawbPqz7wI9sn4sT2d/Pgp8dVcezdOyF/xE0=",
+        "path": "/nix/store/mjfb27njqh10a08556arsz74rf834wnl-source",
+        "type": "path"
+      },
+      "original": {
+        "path": "/nix/store/mjfb27njqh10a08556arsz74rf834wnl-source",
+        "type": "path"
+      }
+    },
+    "flakever-dev": {
+      "locked": {
+        "lastModified": 1751099103,
+        "narHash": "sha256-4NmqJmCP4ndbvM4ws//ENdiDaezNaah3x+NQ8zKR3a4=",
+        "owner": "numinit",
+        "repo": "flakever-example-version",
+        "rev": "4fb4c54f6ee2723d25f2297448653b878ebcf2ff",
+        "type": "github"
+      },
+      "original": {
+        "owner": "numinit",
+        "ref": "dev",
+        "repo": "flakever-example-version",
+        "type": "github"
+      }
+    },
+    "flakever-main": {
+      "locked": {
+        "lastModified": 1751099125,
+        "narHash": "sha256-q106ldLSbtCh9rWz0QP/J6+R7yAxp+nOijQBNariPko=",
+        "owner": "numinit",
+        "repo": "flakever-example-version",
+        "rev": "33d2e885fd126e6c36919da5e2b835dd9963b2ab",
+        "type": "github"
+      },
+      "original": {
+        "owner": "numinit",
+        "ref": "main",
+        "repo": "flakever-example-version",
+        "type": "github"
+      }
+    },
+    "flakever-prod": {
+      "locked": {
+        "lastModified": 1751099142,
+        "narHash": "sha256-5osDliLP6DPdt+5c98TP0HvYWepSST2SfhYUpCWjT1o=",
+        "owner": "numinit",
+        "repo": "flakever-example-version",
+        "rev": "aec083b5fd748c518276061d4bcf1f884ad66d42",
+        "type": "github"
+      },
+      "original": {
+        "owner": "numinit",
+        "ref": "prod",
+        "repo": "flakever-example-version",
+        "type": "github"
+      }
+    },
+    "nixpkgs": {
+      "locked": {
+        "lastModified": 1750776420,
+        "narHash": "sha256-/CG+w0o0oJ5itVklOoLbdn2dGB0wbZVOoDm4np6w09A=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "30a61f056ac492e3b7cdcb69c1e6abdcf00e39cf",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixos-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "root": {
+      "inputs": {
+        "flakever": "flakever",
+        "flakever-dev": "flakever-dev",
+        "flakever-main": "flakever-main",
+        "flakever-prod": "flakever-prod",
+        "nixpkgs": "nixpkgs"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}

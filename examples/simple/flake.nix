@@ -20,9 +20,14 @@
 
       # The default is `flakever` but you can change it.
       scriptName = "version";
+
+      # Max number of digits per component. Optional, but lets you make version codes.
+      digits = [ 1 2 1 ];
     };
 
     packages.${system} = {
+      version = self.flakever.script;
+
       # The version script is pure by default.
       versionTest = pkgs.stdenv.mkDerivation {
         pname = "version-test";
@@ -32,9 +37,11 @@
 
         dontUnpack = true;
 
+        outputs = [ "out" "code" ];
+
         installPhase = ''
           runHook preInstall
-          version > $out
+          version -c >$code 2>$out
           runHook postInstall
         '';
       };
@@ -49,9 +56,11 @@
 
         dontUnpack = true;
 
+        outputs = [ "out" "code" ];
+
         installPhase = ''
           runHook preInstall
-          version -i > $out
+          version -i -c 2>$out >$code
           runHook postInstall
         '';
       };
@@ -61,11 +70,11 @@
     versionTemplate = "1.2.3-<date>";
 
     # lastModified substitutes 19700101 in pure mode, or the flake's last modified in impure mode
-    # versionTemplate = "1.2.3-<date>";
+    # versionTemplate = "1.2.3-<lastModified>";
 
     # nightly is 0 in pure mode, or the difference between the current timestamp
     # and the version input's last modified timestamp, converted to days (ceiling division)
-    #versionTemplate = "1.2.<nightly>";
+    # versionTemplate = "1.2.<nightly>";
 
     # rev is 8 digits of git hash, or unknown
     # versionTemplate = "1.2.3-<rev>";
