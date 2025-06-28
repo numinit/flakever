@@ -125,39 +125,60 @@
           # Computes base^exp iteratively.
           pow = base: exp: builtins.foldl' (s: x: s * base) 1 (builtins.genList (x: x) exp);
 
-          # The version, with purifying substitutions made.
-          version = handleVariablePlaceholders versionInfo.versionTemplate;
+          # Gets an integer at the start of a component string.
+          getInt = componentStr: builtins.fromJSON (builtins.head (getComponentMatch componentStr));
 
-          # Splits the version (note that Nix semantics consider . and - identical, so we do it by hand).
-          split = builtins.split "\\." version;
-          splitVersion = builtins.genList (x: builtins.elemAt split (x * 2)) (builtins.length split / 2 + 1);
+          # Parses and splits a version, computing all the relevant info.
+          mkVersion =
+            version:
+            let
+              # Splits the version (note that Nix semantics consider . and - identical, so we do it by hand).
+              split = builtins.split "\\." version;
+              splitVersion = builtins.genList (x: builtins.elemAt split (x * 2)) (builtins.length split / 2 + 1);
 
-          # Picks the integers out from the start of each component.
-          splitVersion' = builtins.map getInt splitVersion;
+              # Picks the integers out from the start of each component.
+              splitVersionInts = builtins.map getInt splitVersion;
 
-          # The number of version components.
-          numComponents = builtins.length splitVersion';
+              # The number of version components.
+              numComponents = builtins.length splitVersionInts;
 
-          # 0 or missing in the digits list means unlimited.
-          digits' = builtins.genList (
-            x: if x >= builtins.length digits then 0 else builtins.elemAt digits x
-          ) numComponents;
+              # 0 or missing in the digits list means unlimited. Padded out to the correct size.
+              digits' = builtins.genList (
+                x: if x >= builtins.length digits then 0 else builtins.elemAt digits x
+              ) numComponents;
 
-          # Returns true if the max digits are defined for each component of the version.
-          canMakeVersionCode =
-            builtins.length (builtins.filter (x: x > 0) digits') == builtins.length digits';
+              # Returns true if the max digits are defined for each component of the version.
+              canMakeVersionCode =
+                builtins.length (builtins.filter (x: x > 0) digits') == builtins.length digits';
 
-          # Reversed digits turned into factors for building the version code.
-          # For instance, digits' of 1 2 3 4 becomes 1000 100 10 1.
-          factors =
-            if canMakeVersionCode then
-              builtins.foldl' (s: x: s ++ [ (x * (builtins.elemAt s (builtins.length s - 1))) ]) [ 1 ] (
-                builtins.genList (x: pow 10 (builtins.elemAt digits' (builtins.length digits' - x - 1))) (
-                  builtins.length digits' - 1
-                )
-              )
-            else
-              [ ];
+              # Reversed digits turned into factors for building the version code.
+              # For instance, digits' of 1 2 3 4 becomes 1000 100 10 1.
+              factors =
+                if canMakeVersionCode then
+                  builtins.foldl' (s: x: s ++ [ (x * (builtins.elemAt s (builtins.length s - 1))) ]) [ 1 ] (
+                    builtins.genList (x: pow 10 (builtins.elemAt digits' (builtins.length digits' - x - 1))) (
+                      builtins.length digits' - 1
+                    )
+                  )
+                else
+                  [ ];
+            in
+            {
+              inherit
+                splitVersion
+                splitVersionInts
+                numComponents
+                digits'
+                factors
+                canMakeVersionCode
+                ;
+            };
+
+          # The impure version.
+          impureVersion = mkVersion (handleConstantPlaceholders versionInfo.versionTemplate);
+
+          # The pure version.
+          pureVersion = mkVersion (handleVariablePlaceholders versionInfo.versionTemplate);
 
           # Matches a version component and some possible other stuff after it.
           getComponentMatch =
@@ -168,9 +189,6 @@
             in
             assert match != null;
             match;
-
-          # Gets an integer at the start of a component string.
-          getInt = componentStr: builtins.fromJSON (builtins.head (getComponentMatch componentStr));
 
           # Replaces an integer at the start of the specified version component string.
           replaceInt =
@@ -196,6 +214,72 @@
               component * scale;
 
           /**
+            A Nix version of flakever.
+            Mostly just the result of calling mkFlakever.
+            You can call this like a function to get pieces of the version.
+          */
+          nixFlakever = versionInput: {
+            # A functor that produces or removes the first or last n components of the version.
+            __functor =
+              self: n:
+              let
+                inherit (versionInput)
+                  splitVersion
+                  splitVersionInts
+                  numComponents
+                  digits'
+                  factors
+                  canMakeVersionCode
+                  ;
+
+                # Compute the number of elements we want.
+                elems =
+                  let
+                    adjusted = if n <= 0 then numComponents + n else n;
+                  in
+                  if adjusted < 1 then
+                    1
+                  else if adjusted > numComponents then
+                    numComponents
+                  else
+                    adjusted;
+
+                # Build the version.
+                version = builtins.concatStringsSep "." (
+                  builtins.genList (
+                    x:
+                    replaceInt (builtins.elemAt splitVersion x) (
+                      makeComponent (builtins.elemAt splitVersionInts x) (builtins.elemAt digits' x) 1
+                    )
+                  ) elems
+                );
+
+                # And the version code.
+                versionCode =
+                  if canMakeVersionCode then
+                    builtins.foldl' (s: x: s + x) 0 (
+                      builtins.genList (
+                        x:
+                        (makeComponent (if x < elems then builtins.elemAt splitVersionInts x else 0))
+                          (builtins.elemAt digits' x)
+                          (builtins.elemAt factors (builtins.length factors - x - 1))
+                      ) numComponents
+                    )
+                  else
+                    0;
+              in
+              {
+                inherit version versionCode;
+              };
+          };
+
+          # The impure flakever.
+          impureFlakever = nixFlakever impureVersion 0;
+
+          # And the pure flakever.
+          pureFlakever = nixFlakever pureVersion;
+
+          /**
             A derivation building to a shell script that, when executed,
             prints the version up to the number of components specified in $1.
             You can specify --impure (-i) as the first argument to use the current timestamp.
@@ -213,12 +297,12 @@
               dateCmd=${pkgs.coreutils}/bin/date
 
               # Get the version and other constants.
-              version=${lib.escapeShellArg (handleConstantPlaceholders versionInfo.versionTemplate)}
+              version=${lib.escapeShellArg impureFlakever.version}
               version="''${VERSION:-$version}"
               lastModified=${lib.escapeShellArg (toString versionInfo.lastModified)}
               dateFormat=${lib.escapeShellArg dateFormat}
               secondsPerNightly=${lib.escapeShellArg (toString secondsPerNightly)}
-              factors=(${lib.escapeShellArgs (map toString factors)})
+              factors=(${lib.escapeShellArgs (map toString impureVersion.factors)})
 
               isImpure=0
               isCode=0
@@ -350,67 +434,16 @@
                 puts "$versionCode"
               fi
             '';
-
-          /**
-            A Nix version of flakever.
-            Mostly just the result of calling mkFlakever.
-            You can call this like a function to get pieces of the version.
-          */
-          nixFlakever = {
-            # A functor that produces or removes the first or last n components of the version.
-            __functor =
-              self: n:
-              let
-                # Compute the number of elements we want.
-                elems =
-                  let
-                    adjusted = if n <= 0 then numComponents + n else n;
-                  in
-                  if adjusted < 1 then
-                    1
-                  else if adjusted > numComponents then
-                    numComponents
-                  else
-                    adjusted;
-
-                # Build the version.
-                version = builtins.concatStringsSep "." (
-                  builtins.genList (
-                    x:
-                    replaceInt (builtins.elemAt splitVersion x) (
-                      makeComponent (builtins.elemAt splitVersion' x) (builtins.elemAt digits' x) 1
-                    )
-                  ) elems
-                );
-
-                # And the version code.
-                versionCode =
-                  if canMakeVersionCode then
-                    builtins.foldl' (s: x: s + x) 0 (
-                      builtins.genList (
-                        x:
-                        (makeComponent (if x < elems then builtins.elemAt splitVersion' x else 0))
-                          (builtins.elemAt digits' x)
-                          (builtins.elemAt factors (builtins.length factors - x - 1))
-                      ) numComponents
-                    )
-                  else
-                    0;
-              in
-              {
-                inherit version versionCode;
-              };
-          };
         in
-        nixFlakever
+        pureFlakever
         // {
           inherit versionInfo selfVersionInfo;
 
           # Make the full version and version code attributes accessible.
-          inherit (nixFlakever 0) version versionCode;
+          inherit (pureFlakever 0) version versionCode;
 
           # Allow the bash version to be called like a functor too.
-          script = bashFlakever // nixFlakever;
+          script = bashFlakever // pureFlakever;
         };
 
       # In case of typos.

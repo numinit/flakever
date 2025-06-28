@@ -16,9 +16,7 @@
     let
       system = "x86_64-linux";
       pkgs = nixpkgs.legacyPackages.${system};
-    in
-    {
-      flakever = flakever.lib.mkFlakever {
+      flakeverConfig = flakever.lib.mkFlakever {
         # Figures out your version template from the flake output.
         inherit inputs;
 
@@ -35,16 +33,17 @@
           1
         ];
       };
-
+    in
+    {
       packages.${system} = {
-        version = self.flakever.script;
+        version = flakeverConfig.script;
 
         # The version script is pure by default.
         versionTest = pkgs.stdenv.mkDerivation {
           pname = "version-test";
-          inherit (self.flakever) version;
+          inherit (flakeverConfig) version;
 
-          nativeBuildInputs = [ self.flakever.script ];
+          nativeBuildInputs = [ flakeverConfig.script ];
 
           dontUnpack = true;
 
@@ -64,9 +63,9 @@
         # <date> will be substituted with the current date.
         versionTestImpure = pkgs.stdenv.mkDerivation {
           pname = "version-test-impure";
-          inherit (self.flakever) version;
+          inherit (flakeverConfig) version;
 
-          nativeBuildInputs = [ self.flakever.script ];
+          nativeBuildInputs = [ flakeverConfig.script ];
 
           dontUnpack = true;
 
