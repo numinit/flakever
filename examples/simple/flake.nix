@@ -20,12 +20,6 @@
         # Figures out your version template from the flake output.
         inherit inputs;
 
-        # This is optional and gets you the script.
-        inherit pkgs;
-
-        # The default is `flakever` but you can change it.
-        scriptName = "version";
-
         # Max number of digits per component. Optional, but lets you make version codes.
         digits = [
           1
@@ -36,14 +30,9 @@
     in
     {
       packages.${system} = {
-        version = flakeverConfig.script;
-
-        # The version script is pure by default.
         versionTest = pkgs.stdenv.mkDerivation {
           pname = "version-test";
-          inherit (flakeverConfig) version;
-
-          nativeBuildInputs = [ flakeverConfig.script ];
+          inherit (flakeverConfig) version versionCode;
 
           dontUnpack = true;
 
@@ -54,45 +43,21 @@
 
           installPhase = ''
             runHook preInstall
-            version -c >$code 2>$out
-            runHook postInstall
-          '';
-        };
-
-        # However, you can also make it impure, where
-        # <date> will be substituted with the current date.
-        versionTestImpure = pkgs.stdenv.mkDerivation {
-          pname = "version-test-impure";
-          inherit (flakeverConfig) version;
-
-          nativeBuildInputs = [ flakeverConfig.script ];
-
-          dontUnpack = true;
-
-          outputs = [
-            "out"
-            "code"
-          ];
-
-          installPhase = ''
-            runHook preInstall
-            version -i -c 2>$out >$code
+            echo $version > $out
+            echo $versionCode > $code
             runHook postInstall
           '';
         };
       };
 
-      # date substitutes 20250101 in pure mode, or the current date in impure mode
-      versionTemplate = "1.2.3-<date>";
+      # lastModified substitutes the flake's last modified in impure mode
+      versionTemplate = "1.2.3-<lastModifiedDate>";
 
-      # lastModified substitutes 19700101 in pure mode, or the flake's last modified in impure mode
-      # versionTemplate = "1.2.3-<lastModified>";
-
-      # nightly is 0 in pure mode, or the difference between the current timestamp
+      # nightly is the difference between the last modified flake input,
       # and the version input's last modified timestamp, converted to days (ceiling division)
       # versionTemplate = "1.2.<nightly>";
 
-      # rev is 8 digits of git hash, or unknown
+      # rev is 7 digits of git hash, or unknown
       # versionTemplate = "1.2.3-<rev>";
     };
 }

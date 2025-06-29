@@ -1,40 +1,73 @@
 # flakever
 
-Use your flake's last-modified timestamp to create a version that's suitable
-for nightly builds of enterprise software, while maintaining the laziness that
-makes Nix great and keeping your inputs the same.
+What if Nix had something like Jenkins build numbers, but they were generated
+entirely with flake inputs?
 
-The Nix code only uses builtins, and takes an optional pkgs argument if you'd
-like to build a command line tool to version your builds. There are no
-external dependencies. The Nix version gives you the same functionality with no
-impurities. This lets you generate date or time-based version codes in your
-builds, while avoiding rebuilds due to changing inputs.
+With flakever, you can automatically generate versions from a template.
+flakever uses metadata from flake inputs to automatically compute both a
+version and a version code, including a nightly build number that changes as
+the repository is modified by your team.
 
-## Examples
+## Usecases
 
-See examples/simple and examples/multibranch.
+See [examples/simple](https://github.com/numinit/flakever/tree/master/examples/simple)
+and [examples/multibranch](https://github.com/numinit/flakever/tree/master/examples/multibranch).
+
+There are two main usecases: projects where either simple or last modified
+date-based versions are okay, and multibranch projects where branches are
+either versioned independently or need a nightly build number.
+
+### Single repository
+
+Set `outputs.versionTemplate` to your version template. See
+[Version Templates](#version-templates) for more details. Note that the
+`<nightly>` placeholder will always be set to 0 in this case.
+
+### Multibranch versions and nightly builds
+
+Since nightly build numbers are based on the difference between last-modified
+timestamps of your repo and a special flake that just exposes a version
+template, you will need a separate repo that _just_ contains a
+[version template](#version-templates) if you'd like to use it that way.
+
+Nightly builds are mostly useful in larger projects, so you don't have to set
+it up this way if you don't want to. However, if you'd like to manage your
+project's version with a dedicated repository (which may also be useful in
+larger projects), you may want to consider this approach.
 
 **NOTE:** To reset your nightly build number for a branch (e.g. flakever-dev),
-modify the version repo and run: `nix flake lock --update-input flakever-dev`
+modify the version repo and run: `nix flake lock --update-input flakever-dev`.
+This is similar to clearing or manually advancing the build number in Jenkins.
 
 ## Version templates
 
 A **version template** is a string that contains everything flakever needs to
 version your software. It consists of a standard dot-separated version with
-as many or few **numerically prefixed** components as you like, and placeholders.
+as many or few **numerically prefixed** components as you like, and
+placeholders.
 
-For instance: `1.2.3` or `1.2.3-<date>`, or `1.2.3.<date>-<branch>` would all
-be valid version templates. Here are all of the placeholders:
+For instance: `1.2.3` or `1.2.3-<lastModifiedDate>`, or
+`1.2.3.<lastModifiedDate>-<branch>` would all be valid version templates.
+
+Here are all of the placeholders:
 
 |Placeholder|Example|Description|
 |:----------|:------|:----------|
 |`<branch>`|version|Passed through `branch` argument to lib.mkFlakever.|
-|`<longRev>`|242c98f67a3f2d2287346a77477438c1d3e4943b|Long git revision of the current flake.|
+|`<longRev>`|242c98f67a3f2d2287346a77477438c1d3e4943b|Long git revision of the
+current flake.|
 |`<rev>`|242c89f-dirty|Short git revision of the current flake.|
-|`<lastModifiedDate>`|20250628|Last-modified date of your flake, in YYYYMMDD format.|
-|`<lastModifiedTime>`|123456|Last modified time of your flake, in HHMMSS format.|
-|`<date>`|20250101|The current date. In pure mode, this is always 20250101, and is configurable with `defaultDate` and `dateFormat`.|
-|`<nightly>`|42|This is the most powerful template placeholder: it's the number of days between lastModifiedDate of the input containing your version and now, with a minimum of 1, and a rate of increase configurable with `secondsPerNightly`. In pure mode, this is always 0. This allows you to increase the version built into your software at a regular interval for nightly builds without causing a rebuild by changing the version in your derivation. This also lets you reset the nightly build counter with a `nix flake update`.|
+|`<lastModifiedDate>`|20250628|Last-modified date of your flake, in YYYYMMDD
+format.|
+|`<lastModifiedTime>`|123456|Last modified time of your flake, in HHMMSS
+format.|
+|`<nightly>`|42|This is the most powerful template placeholder: it's the number
+of days between lastModified of the input containing your version and the latest
+lastModified in your flake inputs, with a minimum of 1, and a rate of increase
+configurable with `secondsPerNightly`. This allows you to increase the version
+built into your software at a regular interval for nightly builds, but only if
+any of the inputs changed, self included. This also lets you reset the nightly
+build counter with a `nix flake update`.|
 
 ## Version codes
 

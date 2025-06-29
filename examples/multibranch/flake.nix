@@ -24,14 +24,8 @@
         # Figures out your version template from the flake output.
         inherit inputs;
 
-        # This is optional and gets you the script.
-        inherit pkgs;
-
         # Active branch.
         branch = builtins.readFile ./BRANCH;
-
-        # The default is `flakever` but you can change it.
-        scriptName = "version";
 
         # Max number of digits per component. Optional, but lets you make version codes.
         digits = [
@@ -44,14 +38,9 @@
     in
     {
       packages.${system} = {
-        version = flakeverConfig.script;
-
-        # The version script is pure by default.
         versionTest = pkgs.stdenv.mkDerivation {
           pname = "version-test";
-          inherit (flakeverConfig) version;
-
-          nativeBuildInputs = [ flakeverConfig.script ];
+          inherit (flakeverConfig) version versionCode;
 
           dontUnpack = true;
 
@@ -62,29 +51,8 @@
 
           installPhase = ''
             runHook preInstall
-            version -c >$code 2>$out
-            runHook postInstall
-          '';
-        };
-
-        # However, you can also make it impure, where
-        # <date> will be substituted with the current date.
-        versionTestImpure = pkgs.stdenv.mkDerivation {
-          pname = "version-test-impure";
-          inherit (flakeverConfig) version;
-
-          nativeBuildInputs = [ flakeverConfig.script ];
-
-          dontUnpack = true;
-
-          outputs = [
-            "out"
-            "code"
-          ];
-
-          installPhase = ''
-            runHook preInstall
-            version -i -c 2>$out >$code
+            echo $version >$out
+            echo $versionCode >$code
             runHook postInstall
           '';
         };
