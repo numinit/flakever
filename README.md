@@ -58,20 +58,11 @@ Here are all of the placeholders:
 |Placeholder|Example|Description|
 |:----------|:------|:----------|
 |`<branch>`|version|Passed through `branch` argument to lib.mkFlakever.|
-|`<longRev>`|242c98f67a3f2d2287346a77477438c1d3e4943b|Long git revision of the
-current flake.|
+|`<longRev>`|242c98f67a3f2d2287346a77477438c1d3e4943b|Long git revision of the current flake.|
 |`<rev>`|242c89f-dirty|Short git revision of the current flake.|
-|`<lastModifiedDate>`|20250628|Last-modified date of your flake, in YYYYMMDD
-format.|
-|`<lastModifiedTime>`|123456|Last modified time of your flake, in HHMMSS
-format.|
-|`<nightly>`|42|This is the most powerful template placeholder: it's the number
-of days between lastModified of the input containing your version and the latest
-lastModified in your flake inputs, with a minimum of 1, and a rate of increase
-configurable with `secondsPerNightly`. This allows you to increase the version
-built into your software at a regular interval for nightly builds, but only if
-any of the inputs changed, self included. This also lets you reset the nightly
-build counter with a `nix flake update`.|
+|`<lastModifiedDate>`|20250628|Last-modified date of your flake, in YYYYMMDD format.|
+|`<lastModifiedTime>`|123456|Last modified time of your flake, in HHMMSS format.|
+|`<nightly>`|42|This is the most powerful template placeholder: it's the number of days between lastModified of the input containing your version and the latest lastModified in your flake inputs, with a minimum of 1, and a rate of increase configurable with `secondsPerNightly`. This allows you to increase the version built into your software at a regular interval for nightly builds, but only if any of the inputs changed, self included. This also lets you reset the nightly build counter with a `nix flake update`.|
 
 ## Version codes
 
