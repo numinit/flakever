@@ -35,6 +35,10 @@ it up this way if you don't want to. However, if you'd like to manage your
 project's version with a dedicated repository (which may also be useful in
 larger projects), you may want to consider this approach.
 
+An example repository is [numinit/flakever-example-version](https://github.com/numinit/flakever-example-version/).
+Note that `examples/multibranch` includes multiple of its branches as flake
+inputs, which are automatically picked up by flakever.
+
 **NOTE:** To reset your nightly build number for a branch (e.g. flakever-dev),
 modify the version repo and run: `nix flake lock --update-input flakever-dev`.
 This is similar to clearing or manually advancing the build number in Jenkins.
