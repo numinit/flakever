@@ -83,5 +83,4 @@ start with a sequence of digits; for instance, a version template of
 As another example, a template of `1.2.<nightly>-foo` with
 `digits = [ 1 2 2 ]` without a change to `secondsPerNightly` would saturate
 at `1.2.99-foo` and `10299`. Flakever does this by replacing leading sequences
-of digits in the version using Nix prior to building the Bash utility that
-outputs the version.
+of digits in the version using Nix and leaving your suffixes untouched.
