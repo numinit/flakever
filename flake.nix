@@ -225,13 +225,16 @@
                   else
                     adjusted;
 
+                # Returns a saturated version component at the given index.
+                saturatedComponentAt = idx: makeComponent (elemAt splitVersionInts idx) (elemAt digits' idx) 1;
+
                 # Build the version.
                 version = concatStringsSep "." (
-                  genList (
-                    x:
-                    replaceInt (elemAt splitVersion x) (makeComponent (elemAt splitVersionInts x) (elemAt digits' x) 1)
-                  ) elems
+                  genList (idx: replaceInt (elemAt splitVersion idx) (saturatedComponentAt idx)) elems
                 );
+
+                # This is the "clean" version (i.e. the version *just* as the dot-separated integer values).
+                cleanVersion = concatStringsSep "." (genList (idx: toString (saturatedComponentAt idx)) elems);
 
                 # And the version code.
                 versionCode =
@@ -248,21 +251,21 @@
                     0;
               in
               {
-                inherit version versionCode;
+                inherit version cleanVersion versionCode;
               };
           };
         in
         nixFlakever
         // {
           # Make the full version and version code attributes accessible.
-          inherit (nixFlakever 0) version versionCode;
+          inherit (nixFlakever 0) version cleanVersion versionCode;
         };
 
       # In case of typos.
       lib.mkFlakeVer = throw "You meant: lib.mkFlakever";
 
       # And, of course, flakever itself has a flakever.
-      versionTemplate = "0.4.0-<lastModifiedDate>";
+      versionTemplate = "0.5.0-<lastModifiedDate>";
 
       inherit
         (self.lib.mkFlakever {
@@ -274,6 +277,7 @@
           ];
         })
         version
+        cleanVersion
         versionCode
         ;
     };

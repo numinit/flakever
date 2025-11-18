@@ -64,12 +64,19 @@ Here are all of the placeholders:
 |`<lastModifiedTime>`|123456|Last modified time of your flake, in HHMMSS format.|
 |`<nightly>`|42|This is the most powerful template placeholder: it's the number of days between lastModified of the input containing your version and the latest lastModified in your flake inputs, with a minimum of 1, and a rate of increase configurable with `secondsPerNightly`. This allows you to increase the version built into your software at a regular interval for nightly builds, but only if any of the inputs changed, self included. This also lets you reset the nightly build counter with a `nix flake update`.|
 
+You can access the final version using the `version` attribute of your flakever.
+
+## Clean versions
+
+Just want numbers separated by dots? Use `cleanVersion` instead, it's that easy.
+
 ## Version codes
 
 flakever can automatically generate a **version code** from your version string,
 while simultaneously saturating increasing version components at a given number
 of digits. You do this by specifying the `digits` option in your flakever
-config.
+config. Not specifying the correct number of digits will result in `versionCode`
+reading 0.
 
 **NOTE:** Version codes corresponding to version strings are useful in some
 build pipelines, like Android.

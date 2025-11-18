@@ -32,18 +32,20 @@
       packages.${system} = {
         versionTest = pkgs.stdenv.mkDerivation {
           pname = "version-test";
-          inherit (flakeverConfig) version versionCode;
+          inherit (flakeverConfig) version cleanVersion versionCode;
 
           dontUnpack = true;
 
           outputs = [
             "out"
+            "clean"
             "code"
           ];
 
           installPhase = ''
             runHook preInstall
             echo $version > $out
+            echo $cleanVersion > $clean
             echo $versionCode > $code
             runHook postInstall
           '';
